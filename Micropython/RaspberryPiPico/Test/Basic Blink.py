@@ -9,4 +9,5 @@ while True:
     sleep(0.5)
     led.value(0)
     print("Apagado")
+    print("Gay")
     sleep(0.5)
