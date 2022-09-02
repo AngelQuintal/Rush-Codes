@@ -1,4 +1,5 @@
 {
     "board": "arduino:avr:uno",
-    "programmer": "arduino:arduinoasispatmega32u4"
+    "programmer": "arduino:arduinoasispatmega32u4",
+    "sketch": "C codes\\Prueba.ino"
 }
