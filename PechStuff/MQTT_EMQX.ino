@@ -8,7 +8,7 @@ const char *password = "qweqweqwe";  // Enter WiFi password
 // MQTT Broker
 const char *mqtt_broker = "broker.emqx.io";
 const char *topic = "esp32/test";
-const char *mqtt_username = "emqx";
+const char *mqtt_username = "admin";
 const char *mqtt_password = "public";
 const int mqtt_port = 1883;
 
