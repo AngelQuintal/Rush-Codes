@@ -10,7 +10,7 @@ const char *mqtt_broker = "broker.emqx.io";
 const char *topic = "esp32/test";
 const char *mqtt_username = "admin";
 const char *mqtt_password = "public";
-const int mqtt_port = 1883;
+const int mqtt_port = 18083;
 
 WiFiClient espClient;
 PubSubClient client(espClient);
