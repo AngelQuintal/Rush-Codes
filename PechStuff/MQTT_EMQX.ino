@@ -1,61 +1,81 @@
-#include <WiFi.h>
-#include <PubSubClient.h>
+import json
+import random
+import time
 
-// WiFi
-const char *ssid = "mousse"; // Enter your WiFi name
-const char *password = "qweqweqwe";  // Enter WiFi password
+from paho.mqtt import client as mqtt_client
 
-// MQTT Broker
-const char *mqtt_broker = "broker.emqx.io";
-const char *topic = "esp32/test";
-const char *mqtt_username = "admin";
-const char *mqtt_password = "public";
-const int mqtt_port = 18083;
 
-WiFiClient espClient;
-PubSubClient client(espClient);
+BROKER = 'saposteamiot.tk'
+PORT = 8093
+TOPIC = "Entrada/01"
 
-void setup() {
-    // Set software serial baud to 115200;
-    Serial.begin(115200);
-    // connecting to a WiFi network
-    WiFi.begin(ssid, password);
-    while (WiFi.status() != WL_CONNECTED) {
-        delay(500);
-        Serial.println("Connecting to WiFi..");
-    }
-    Serial.println("Connected to the WiFi network");
-    //connecting to a mqtt broker
-    client.setServer(mqtt_broker, mqtt_port);
-    client.setCallback(callback);
-    while (!client.connected()) {
-        String client_id = "esp32-client-";
-        client_id += String(WiFi.macAddress());
-        Serial.printf("The client %s connects to the public mqtt broker\n", client_id.c_str());
-        if (client.connect(client_id.c_str(), mqtt_username, mqtt_password)) {
-            Serial.println("Public emqx mqtt broker connected");
-        } else {
-            Serial.print("failed with state ");
-            Serial.print(client.state());
-            delay(2000);
+SSID = "ssid"
+PASSWORD = "psswrd"
+
+
+# generate client ID with pub prefix randomly
+CLIENT_ID = "python-mqtt-ws-pub-{id}".format(id=random.randint(0, 1000))
+USERNAME = 'emqx'
+PASSWORD = 'public'
+FLAG_CONNECTED = 0
+
+
+def on_connect(client, userdata, flags, rc):
+    global FLAG_CONNECTED
+    if rc == 0:
+        FLAG_CONNECTED = 1
+        print("Connected to MQTT Broker!")
+    else:
+        print("Failed to connect, return code {rc}".format(rc=rc), )
+        
+def do_connect(SSID, PASSWORD):
+    import network                            # importa el módulo network
+    global sta_if
+    sta_if = network.WLAN(network.STA_IF)     # instancia el objeto -sta_if- para realizar la conexión en modo STA 
+    if not sta_if.isconnected():              # si no existe conexión...
+        sta_if.active(True)                   # activa el interfaz STA del ESP32
+        sta_if.connect(SSID, PASSWORD)        # inicia la conexión con el AP
+        print('Dame un momento, wey. Me estoy conectando a ', SSID +"...")
+        while not sta_if.isconnected():           # ...si no se ha establecido la conexión...
+            pass                                  # ...repite el bucle...
+    print('Configuración de red (IP/netmask/gw/DNS):', sta_if.ifconfig())
+do_connect(SSID,PASSWORD)
+
+def connect_mqtt():
+    client = mqtt_client.Client(CLIENT_ID, transport='websockets')
+    client.username_pw_set(USERNAME, PASSWORD)
+    client.on_connect = on_connect
+    client.connect(BROKER, PORT)
+    return client
+
+
+def publish(client):
+    msg_count = 0
+    while True:
+        msg_dict = {
+            'msg': msg_count
         }
-    }
-    // publish and subscribe
-    client.publish(topic, "Hi EMQ X I'm ESP32 ^^");
-    client.subscribe(topic);
-}
+        msg = json.dumps(msg_dict)
+        result = client.publish(TOPIC, msg)
+        # result: [0, 1]
+        status = result[0]
+        if status == 0:
+            print("Send `{msg}` to topic `{topic}`".format(msg=msg, topic=TOPIC))
+        else:
+            print("Failed to send message to topic {topic}".format(topic=TOPIC))
+        msg_count += 1
+        time.sleep(1)
 
-void callback(char *topic, byte *payload, unsigned int length) {
-    Serial.print("Message arrived in topic: ");
-    Serial.println(topic);
-    Serial.print("Message:");
-    for (int i = 0; i < length; i++) {
-        Serial.print((char) payload[i]);
-    }
-    Serial.println();
-    Serial.println("-----------------------");
-}
 
-void loop() {
-    client.loop();
-}
+def run():
+    client = connect_mqtt()
+    client.loop_start()
+    time.sleep(1)
+    if FLAG_CONNECTED:
+        publish(client)
+    else:
+        client.loop_stop()
+
+
+if __name__ == '__main__':
+    run()
