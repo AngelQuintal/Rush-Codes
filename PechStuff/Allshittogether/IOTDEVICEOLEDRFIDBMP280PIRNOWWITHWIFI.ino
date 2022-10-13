@@ -1,4 +1,6 @@
 
+#include <stdlib.h>
+#include <string.h>
 ///OLED////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include <Wire.h>
 #include <Adafruit_GFX.h>
@@ -67,8 +69,8 @@ boolean screen_flag=true;
 #include <PubSubClient.h>
 
 // WiFi
-const char *ssid = "Students"; // Enter your WiFi name
-const char *password = "P0l1t3cn1c4.b1s";  // Enter WiFi password
+const char *ssid = "Quintal Home"; // Enter your WiFi name
+const char *password = "Quintal2021";  // Enter WiFi password
 
 //const char *ssid = "IZZI-75D2"; // Enter your WiFi name
 //const char *password = "50A5DC3975D2";  // Enter WiFi password
@@ -76,6 +78,8 @@ const char *password = "P0l1t3cn1c4.b1s";  // Enter WiFi password
 // MQTT Broker
 const char *mqtt_broker = "broker.emqx.io";
 const char *topic = "1/temp";
+const char *topic2 = "1/hum";
+const char *topic3 = "1/pres";
 const char *mqtt_username = "emqx";
 const char *mqtt_password = "public";
 const int mqtt_port = 1883;
@@ -135,8 +139,10 @@ void setup() {
   //PIR SENSOR/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
    // PIR Motion Sensor mode INPUT_PULLUP
   pinMode(motionSensor, INPUT_PULLUP);
+    Serial.print("SOBREVIVO");
   // Set motionSensor pin as interrupt, assign interrupt function and set RISING mode
   attachInterrupt(digitalPinToInterrupt(motionSensor), detectsMovement, RISING);
+    Serial.print("SOBREVIVO 2");
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
   // Set LED to LOW
@@ -166,10 +172,8 @@ void setup() {
             delay(2000);
         }
     }
-
-     // publish and subscribe
-    client.publish(topic, "Hi EMQ X I'm ESP32 ^^");
-    client.subscribe(topic);
+    
+     // publish and subscribe 
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 }
@@ -190,11 +194,15 @@ void compare_user_stored(byte rfid_read[4]){//PUT THE ID HERE
    display.setCursor(0, 50);
    display.print("Name: ");//Printing on screen
    
-  if(admin[0]==rfid_read[0]&&admin[1]==rfid_read[1]&&admin[2]==rfid_read[2]&&admin[3]==rfid_read[3]){
+  if( admin[0] == rfid_read[0] && admin[1] == rfid_read[1] && 
+      admin[2] == rfid_read[2] && admin[3] == rfid_read[3] )
+  {
        display.print("admin");//Printing on screen}
        display.print(",UNLOCKED!");//Printing on screen
        digitalWrite(led, HIGH);//OPENS DOOR
-    }else{
+  }
+  else
+  {
     display.print("unknown");//Printing on screen
     digitalWrite(led, LOW);//CLOSE DOOR
     }
@@ -246,6 +254,7 @@ void readRFID(void ) { /* function readRFID */
   printDec(rfid.uid.uidByte, rfid.uid.size); //INSIDE THIS VOID MOST OF THE MAGIC HAPPENS
   Serial.println();
 
+  Serial.print("PUTO\n");
   compare_user_stored(nuidPICC);
   display.display();
 
@@ -256,9 +265,34 @@ void readRFID(void ) { /* function readRFID */
 
 
   closed_door_message();
+  float humidity;
+  humidity = 100*pow(euler,c);
+  
+  // String temp = String(temperature,2);
+  char *data = (char *)malloc(sizeof(char) * 25);
+  
+  sprintf(data, "%.2f", temperature);
+  client.publish(topic, data);
+  client.subscribe(topic);
+  delay(100);
+  sprintf(data, "%.2f", humidity);
+  client.publish(topic2, data);
+  client.subscribe(topic2);
+  delay(100);
+  sprintf(data, "%.2f", pressure);
+  client.publish(topic3, data);
+  client.subscribe(topic3);
+  delay(100);
+  Serial.print("aqui!");
+  // Serial.print(data);      
+   
+  
+  
   
   
   //display.ssd1306_command(SSD1306_DISPLAYOFF);
+  free(data);
+
   
 }
 
@@ -347,7 +381,7 @@ void checkPIR(){//
   
   }
 
-void loop() {
+void loop() {  
 
   client.loop();
   checkPIR();//resseting PIR sensor and getting the status
@@ -365,7 +399,8 @@ void loop() {
   }
 
   //Serial_BMP280_PRINT(a,b,c,temperature, pressure, altitude);//Serial debugginh of the variables
-  
-  readRFID();//MAIN FUNCTION; WHEN NOTHING SLEEPS/IDLES
 
+    
+  readRFID();//MAIN FUNCTION; WHEN NOTHING SLEEPS/IDLES
+  
 }
