@@ -61,7 +61,7 @@ boolean startTimer = false;
 
 //INTERRUPOT BUTTON/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define pushButton_pin   35
-boolean screen_flag=true; 
+boolean screen_flag=true;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //WIFI/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -80,6 +80,7 @@ const char *mqtt_broker = "broker.emqx.io";
 const char *topic = "1/temp";
 const char *topic2 = "1/hum";
 const char *topic3 = "1/pres";
+const char *topic4 = "1/key";
 const char *mqtt_username = "emqx";
 const char *mqtt_password = "public";
 const int mqtt_port = 1883;
@@ -121,7 +122,7 @@ void setup() {
   display.setTextColor(WHITE);
   display.display();
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  
+
   //BMP280/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   bmp280.begin();
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -144,7 +145,7 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(motionSensor), detectsMovement, RISING);
     Serial.print("SOBREVIVO 2");
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  
+
   // Set LED to LOW
   pinMode(led, OUTPUT);
   digitalWrite(led, LOW);
@@ -172,8 +173,8 @@ void setup() {
             delay(2000);
         }
     }
-    
-     // publish and subscribe 
+
+     // publish and subscribe
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 }
@@ -190,23 +191,29 @@ void callback(char *topic, byte *payload, unsigned int length) {
 }
 
 void compare_user_stored(byte rfid_read[4]){//PUT THE ID HERE
-   
+
    display.setCursor(0, 50);
    display.print("Name: ");//Printing on screen
-   
-  if( admin[0] == rfid_read[0] && admin[1] == rfid_read[1] && 
+
+  if( admin[0] == rfid_read[0] && admin[1] == rfid_read[1] &&
       admin[2] == rfid_read[2] && admin[3] == rfid_read[3] )
   {
        display.print("admin");//Printing on screen}
        display.print(",UNLOCKED!");//Printing on screen
        digitalWrite(led, HIGH);//OPENS DOOR
+       //Sends a 1 to server
+       client.publish(topic4,"1");
+       client.subscribe(topic4);
   }
   else
   {
     display.print("unknown");//Printing on screen
-    digitalWrite(led, LOW);//CLOSE DOOR
+    digitalWrite(led, LOW0;//CLOSE DOOR
+    //Sends a 0 to server
+    client.publish(topic4,"0");
+    client.subscribe(topic4);
     }
-    
+
     }
 
 void closed_door_message(){//WHEN THE DOOR CLOSES
@@ -224,7 +231,7 @@ void closed_door_message(){//WHEN THE DOOR CLOSES
 void readRFID(void ) { /* function readRFID */
 
   //display.ssd1306_command(SSD1306_DISPLAYON);
-  
+
   ////Read RFID card
   //byte andy[4]; DEBUGGING VARIABLE
   //display.ssd1306_command(SSD1306_DISPLAYON);//after display offed
@@ -249,7 +256,7 @@ void readRFID(void ) { /* function readRFID */
 //  printHex(rfid.uid.uidByte, rfid.uid.size);
 //  Serial.println();
   // Halt PICC
-  
+
   Serial.print(F("RFID In dec: "));
   printDec(rfid.uid.uidByte, rfid.uid.size); //INSIDE THIS VOID MOST OF THE MAGIC HAPPENS
   Serial.println();
@@ -267,10 +274,10 @@ void readRFID(void ) { /* function readRFID */
   closed_door_message();
   float humidity;
   humidity = 100*pow(euler,c);
-  
+
   // String temp = String(temperature,2);
   char *data = (char *)malloc(sizeof(char) * 25);
-  
+
   sprintf(data, "%.2f", temperature);
   client.publish(topic, data);
   client.subscribe(topic);
@@ -284,16 +291,16 @@ void readRFID(void ) { /* function readRFID */
   client.subscribe(topic3);
   delay(100);
   Serial.print("aqui!");
-  // Serial.print(data);      
-   
-  
-  
-  
-  
+  // Serial.print(data);
+
+
+
+
+
   //display.ssd1306_command(SSD1306_DISPLAYOFF);
   free(data);
 
-  
+
 }
 
 /**
@@ -310,14 +317,14 @@ void printHex(byte *buffer, byte bufferSize) {
    Helper routine to dump a byte array as dec values to Serial.
 */
 void printDec(byte *buffer, byte bufferSize) {//PRINTS USER ID
-  
+
   int j=0;
   display.clearDisplay();
   print_info_oled(temperature, pressure, altitude, c);//Info gets printed on screen
 
   display.setCursor(0, 40);
   display.print(F("user "));
-  
+
   for (byte i = 0; i < bufferSize; i++) {
     Serial.print(buffer[i] < 0x10 ? " 0" : " ");
     Serial.print(buffer[i], DEC);
@@ -328,8 +335,8 @@ void printDec(byte *buffer, byte bufferSize) {//PRINTS USER ID
   }
 
   j=0;
-  
-  
+
+
 }
 
 void Serial_BMP280_PRINT(float a, float b, float c, float temperature, float pressure, float altitude){//DISPLAY SENSOR VALUES IN SERIAL
@@ -378,10 +385,10 @@ void checkPIR(){//
     digitalWrite(led, LOW);
     startTimer = false;
   }
-  
+
   }
 
-void loop() {  
+void loop() {
 
   client.loop();
   checkPIR();//resseting PIR sensor and getting the status
@@ -392,7 +399,7 @@ void loop() {
   a=(-4283.58*temperature)+(4283.58*YDEWPOINT);//simplification of a long equation to sums
   b=(YDEWPOINT+243.04)*(temperature+243.04);//simplification of a long equation to sums
   c=a/b;//simplification of a long equation to get the Relative Humidity in %
-   
+
   //Serial_BMP280_PRINT(a,b,c,temperature, pressure, altitude);//Serial debugginh of the variables
   //print_info_oled(temperature, pressure, altitude, c);//Info gets printed on screen
 
@@ -400,7 +407,7 @@ void loop() {
 
   //Serial_BMP280_PRINT(a,b,c,temperature, pressure, altitude);//Serial debugginh of the variables
 
-    
+
   readRFID();//MAIN FUNCTION; WHEN NOTHING SLEEPS/IDLES
-  
+
 }
