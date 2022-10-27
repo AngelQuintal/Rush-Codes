@@ -51,7 +51,7 @@ MFRC522 rfid = MFRC522(SS_PIN, RST_PIN);
 
 // Set GPIOs for LED and PIR Motion Sensor
 const int led = 2;
-const int buzzer = 34;
+const int buzzer = 32;
 const int motionSensor = 14;
 
 // Timer: Auxiliary variables
@@ -70,11 +70,11 @@ boolean screen_flag=true;
 #include <PubSubClient.h>
 
 // WiFi
-const char *ssid = "Students"; // Enter your WiFi name
-const char *password = "P0l1t3cn1c4.b1s";  // Enter WiFi password
+//const char *ssid = "Students"; // Enter your WiFi name
+//const char *password = "P0l1t3cn1c4.b1s";  // Enter WiFi password
 
-//const char *ssid = "IZZI-75D2"; // Enter your WiFi name
-//const char *password = "50A5DC3975D2";  // Enter WiFi password
+const char *ssid = "IZZI-75D2"; // Enter your WiFi name
+const char *password = "50A5DC3975D2";  // Enter WiFi password
 
 // MQTT Broker
 const char *mqtt_broker = "broker.emqx.io";
@@ -172,13 +172,15 @@ void setup() {
         Serial.printf("The client %s connects to the public mqtt broker\n", client_id.c_str());
         if (client.connect(client_id.c_str(), mqtt_username, mqtt_password)) {
             Serial.println("Public emqx mqtt broker connected");
+            digitalWrite(buzzer, HIGH);
+            delay(100);
         } else {
             Serial.print("failed with state ");
             Serial.print(client.state());
             delay(2000);
         }
     }
-
+    digitalWrite(buzzer, LOW);
      // publish and subscribe
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
