@@ -5,8 +5,8 @@ import time
 from paho.mqtt import client as mqtt_client
 
 
-BROKER = 'saposteamiot.tk'
-PORT = 8093
+BROKER = 'broker.emqx.io'
+PORT = 8084
 TOPIC = "1/temp"
 # generate client ID with pub prefix randomly
 CLIENT_ID = "python-mqtt-ws-pub-{id}".format(id=random.randint(0, 1000))

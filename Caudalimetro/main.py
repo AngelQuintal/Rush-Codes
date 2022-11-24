@@ -7,7 +7,8 @@ import os
 from sdcard import SDCard
 import _thread
 
-write_time_c = 20
+# write_time_c = 20
+write_time_c = 5
 i = 0
 andycounter = 0
 
@@ -46,7 +47,7 @@ def sdcard_write (qval):
         sQ = str(fQ)
 
         f = open('CAUD1.txt', 'a')
-        f.write(sday + '/' + smonth + '/' + syear + '      ' + shour + ':' + sminute + ':' + ssecond + '          ' l+ sQ + '\n')
+        f.write(sday + '/' + smonth + '/' + syear + '      ' + shour + ':' + sminute + ':' + ssecond + '          ' + 'Q='+ sQ + '\n')
         f.close()
         print("Data was sent")
         utime.sleep(0.5)
