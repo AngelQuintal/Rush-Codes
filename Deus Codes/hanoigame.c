@@ -3,68 +3,68 @@
 #include <string.h>
 #include <unistd.h>
 
-#define TOWER_A 'A'
-#define TOWER_B 'B'
-#define TOWER_C 'C'
+#define torre_A 'A'
+#define torre_B 'B'
+#define torre_C 'C'
 
 
 #define DISC_CHARACTER '*'
 
 
-unsigned int numberOfDiscs = 0;
-char *tower;
+unsigned int numeroDeDiscos = 0;
+char *torre;
 
-void rewindCursor(const unsigned int lines, const unsigned int columns)
+void rewindCursor(const unsigned int lineaas, const unsigned int columnaas)
 {
-    printf("\x1b[%dA", lines);
-    printf("\x1b[%dD", columns);
+    printf("\x1b[%dA", lineaas);
+    printf("\x1b[%dD", columnaas);
 }
 
 void printCentered(char *str, unsigned int size)
 {
-    const unsigned int spaces = (size - strlen(str));
-    const unsigned int spacesBefore = spaces / 2;
-    const unsigned int spacesAfter = spacesBefore + spaces % 2;
-    for (unsigned int i = 0; i < spacesBefore; i++)
+    const unsigned int espacios = (size - strlen(str));
+    const unsigned int espaciosAntes = espacios / 2;
+    const unsigned int espaciosDespues = espaciosAntes + espacios % 2;
+    for (unsigned int i = 0; i < espaciosAntes; i++)
         putchar(' ');
     printf("%s", str);
-    for (unsigned int i = 0; i < spacesAfter; i++)
+    for (unsigned int i = 0; i < espaciosDespues; i++)
         putchar(' ');
 }
 
 void printHeader()
 {
-    printCentered("Tower A", 2 * numberOfDiscs);
-    printCentered("Tower B", 2 * numberOfDiscs);
-    printCentered("Tower C", 2 * numberOfDiscs);
+    printCentered("torre A", 2 * numeroDeDiscos);
+    printCentered("torre B", 2 * numeroDeDiscos);
+    printCentered("torre C", 2 * numeroDeDiscos);
     putchar('\n');
 }
 
-void printTower()
+void printtorre()
 {
     static const unsigned int offset = 1;
-    const unsigned int baseDiscSize = 2 * numberOfDiscs - 1;
-    const unsigned int numberOfColumns = 3 * (baseDiscSize + offset);
-    unsigned int a = numberOfDiscs, b = numberOfDiscs, c = numberOfDiscs;
-    char table[numberOfDiscs][numberOfColumns];
-    memset(table, ' ', sizeof(table));
+    const unsigned int basedeisco = 2 * numeroDeDiscos - 1;
+    const unsigned int NumeroDecolumnaas = 3 * (basedeisco + offset);
+    unsigned int a = numeroDeDiscos, b = numeroDeDiscos, c = numeroDeDiscos;
+    char tabla[numeroDeDiscos][NumeroDecolumnaas];
+    memset(tabla, ' ', sizeof(tabla));
 
-    for (unsigned int i = numberOfDiscs - 1; i < numberOfDiscs; i--)
+    for (unsigned int i = numeroDeDiscos - 1; i < numeroDeDiscos; i--)
     {
-        unsigned int line;
-        const unsigned int discSize = baseDiscSize - 2 * (numberOfDiscs - i - 1);
-        const unsigned int column = (tower[i] - TOWER_A) * (baseDiscSize + offset) + numberOfDiscs - i + offset - 1;
-        if (tower[i] == TOWER_A)
-            line = --a;
-        else if (tower[i] == TOWER_B)
-            line = --b;
-        else if (tower[i] == TOWER_C)
-            line = --c;
-        memset(&table[line][column], DISC_CHARACTER, discSize);
+        unsigned int linea;
+        const unsigned int tamdisco = basedeisco - 2 * (numeroDeDiscos - i - 1);
+        const unsigned int columna = (torre[i] - torre_A) * (basedeisco + offset) + numeroDeDiscos - i + offset - 1;
+        if (torre[i] == torre_A)
+            linea = --a;
+        else if (torre[i] == torre_B)
+            linea = --b;
+        else if (torre[i] == torre_C)
+            linea = --c;
+        memset(&tabla[linea][columna], DISC_CHARACTER, tamdisco);
     }
-    for (unsigned int line = 0; line < numberOfDiscs; line++)
+    for (unsigned int linea = 0; linea < numeroDeDiscos; linea++)
     {
-        printf("%.*s\n", numberOfColumns, table[line]);
+        printf("%.*s\n", NumeroDecolumnaas, tabla[linea]);
     }
 }
 
@@ -72,11 +72,11 @@ void move(unsigned int n, char a, char b)
 {
     static unsigned int steps = 0;
     sleep(1);
-    tower[n - 1] = b;
-    rewindCursor(numberOfDiscs + 3, 0);
-    printf("Step %d: Move disc %d from %c to %c \n\n", ++steps, n, a, b);
+    torre[n - 1] = b;
+    rewindCursor(numeroDeDiscos + 3, 0);
+    printf("Paso %d: Mover disco %d de %c a %c \n\n", ++steps, n, a, b);
     printHeader();
-    printTower();
+    printtorre();
 }
 
 void hanoi(unsigned int n, char a, char b, char c)
@@ -95,17 +95,17 @@ int main(const int argc, const char *const argv[])
 {
     if (argc >= 2)
     {
-        numberOfDiscs = atoi(argv[1]);
-    } 
-    if (numberOfDiscs < 4) {
-        numberOfDiscs = 5;
+        numeroDeDiscos = atoi(argv[1]);
     }
-    tower = malloc(numberOfDiscs);
-    memset(tower, TOWER_A, numberOfDiscs);
-    printf("Initial position:\n\n");
+    if (numeroDeDiscos < 4) {
+        numeroDeDiscos = 5;
+    }
+    torre = malloc(numeroDeDiscos);
+    memset(torre, torre_A, numeroDeDiscos);
+    printf("Posicion inicial:\n\n");
     printHeader();
-    printTower();
-    hanoi(numberOfDiscs, TOWER_A, TOWER_B, TOWER_C);
-    free(tower);
+    printtorre();
+    hanoi(numeroDeDiscos, torre_A, torre_B, torre_C);
+    free(torre);
     return EXIT_SUCCESS;
 }
