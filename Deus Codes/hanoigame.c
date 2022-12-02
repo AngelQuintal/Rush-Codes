@@ -25,11 +25,11 @@ void printCentered(char *str, unsigned int size)
     const unsigned int espacios = (size - strlen(str));
     const unsigned int espaciosAntes = espacios / 2;
     const unsigned int espaciosDespues = espaciosAntes + espacios % 2;
-    for (unsigned int i = 0; i < espaciosAntes; i++)
-        putchar(' ');
+    for (unsigned i = 0; i < espaciosAntes; i++){
+        putchar(' ');}
     printf("%s", str);
-    for (unsigned int i = 0; i < espaciosDespues; i++)
-        putchar(' ');
+    for (unsigned i = 0; i < espaciosDespues; i++){
+        putchar(' ');}
 }
 
 void printHeader()
@@ -49,7 +49,7 @@ void printtorre()
     char tabla[numeroDeDiscos][NumeroDecolumnaas];
     memset(tabla, ' ', sizeof(tabla));
 
-    for (unsigned int i = numeroDeDiscos - 1; i < numeroDeDiscos; i--)
+    for (unsigned i = numeroDeDiscos - 1; i < numeroDeDiscos; i--)
     {
         unsigned int linea;
         const unsigned int tamdisco = basedeisco - 2 * (numeroDeDiscos - i - 1);
@@ -62,7 +62,7 @@ void printtorre()
             linea = --c;
         memset(&tabla[linea][columna], DISC_CHARACTER, tamdisco);
     }
-    for (unsigned int linea = 0; linea < numeroDeDiscos; linea++)
+    for (unsigned linea = 0; linea < numeroDeDiscos; linea++)
     {
         printf("%.*s\n", NumeroDecolumnaas, tabla[linea]);
     }
